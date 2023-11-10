@@ -1,0 +1,14 @@
+FROM quay.io/fedora/fedora-coreos:stable
+
+LABEL org.opencontainers.image.title="Fedora CoreOS"
+LABEL org.opencontainers.image.description="Fedora CoreOS UKI"
+LABEL org.opencontainers.image.source="https://github.com/travier/fedora-coreos-uki"
+LABEL org.opencontainers.image.licenses="MIT"
+
+# RUN rpm-ostree install dnf
+
+# Copy custom config to /usr & /etc
+COPY usr usr
+COPY etc etc
+
+RUN ostree container commit
