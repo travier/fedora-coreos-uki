@@ -78,6 +78,10 @@ jobs:
           layers: false
           oci: true
           labels: org.opencontainers.image.version=${{ steps.version.outputs.version }}
+          extra-args: |
+            --secret=id=key,src=secure_boot.key
+            --secret=id=cert,src=secure_boot.cert
+            --secret=id=ostree,src=ostree-sign.key
 
       - name: Push to Container Registry
         uses: redhat-actions/push-to-registry@v2
