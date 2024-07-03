@@ -50,8 +50,8 @@ jobs:
           if [[ -n ${VERSION} ]]; then
             version="${VERSION}"
           else
-            version_base="$(skopeo inspect docker://${BASEIMAGE} | jq -r '.Labels."org.opencontainers.image.version"')"
-            version_derived="$(skopeo inspect docker://${REGISTRY}/${NAME} | jq -r '.Labels."org.opencontainers.image.version"')"
+            version_base="$(skopeo inspect docker://${BASEIMAGE} | jq -r '.Labels."org.opencontainers.image.version"' || true)"
+            version_derived="$(skopeo inspect docker://${REGISTRY}/${NAME} | jq -r '.Labels."org.opencontainers.image.version"' || true)"
             if [[ "${version_base}" == "${version_derived}" ]]; then
               patch="${version_base##*\.}"
               ((patch++)) || true
