@@ -1,0 +1,24 @@
+#!/bin/bash
+
+main() {
+    local -r key_file="fcos-uki/ostree-sign"
+
+    # Generate the key
+    openssl genpkey -algorithm ed25519 -outform PEM -out "${key_file}"
+
+    # Extract the pubkey
+    PUBKEY="$(openssl pkey -outform DER -pubout -in "${key_file}" | tail -c 32 | base64)"
+
+    # Write the pubkey
+    echo "${PUBKEY}" > "${key_file}.pub"
+
+    # Convert the private key to base64 for ostree signing
+    # Extract the seed
+    SEED="$(openssl pkey -outform DER -in "${key_file}" | tail -c 32 | base64)"
+    # Secret key is the concatenation of SEED and PUBLIC
+    echo "${SEED}${PUBKEY}" | base64 -d | base64 -w 0 > "${key_file}.key"
+
+    rm "${key_file}"
+}
+
+main "${@}"
