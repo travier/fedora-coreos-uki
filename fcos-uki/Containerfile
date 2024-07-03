@@ -5,9 +5,35 @@ LABEL org.opencontainers.image.description="Fedora CoreOS UKI"
 LABEL org.opencontainers.image.source="https://github.com/travier/fedora-coreos-uki"
 LABEL org.opencontainers.image.licenses="MIT"
 
-# RUN rpm-ostree install dnf
+# Install the required tools
+RUN rpm-ostree install \
+        sbsigntools \
+        systemd-ukify
+# Setup composefs for signed mode
 RUN install -dm 0755 -o 0 -g 0 /usr/lib/ostree \
     && \
-    echo -n "[composefs]\nenabled = yes\n" > /usr/lib/ostree/prepare-root.conf
+    echo -n "[composefs]\nenabled=signed\n" > /usr/lib/ostree/prepare-root.conf
 
+# Import ostree commit signing public key
+ADD ostree-sign.pub /etc/ostree/initramfs-root-binding.key
+
+# Regenerate the initrd
+RUN ...
+
+# Generate UKI
+RUN ukify build \
+    --linux=/usr/lib/modules/*/vmlinuz \
+    --initrd=/usr/lib/modules/*/initramfs.img \
+    --cmdline="$(cat /boot/loader/entries/ostree-1.conf | grep options | sed "s/options //" | sed "s/ostree=.*//")"
+
+# Remove kernel & initramfs
+RUN rm /usr/lib/modules/*/vmlinuz /usr/lib/modules/*/initramfs.img
+
+# Sign UKI with Secure Boot key
+RUN --mont-type=secret, ...
+
+# Import UKI into ostree repo & create a new commit
 RUN ostree container commit
+
+# Sign ostree commit
+RUN ...
