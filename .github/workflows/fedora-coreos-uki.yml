@@ -10,14 +10,14 @@ on:
     branches:
       - main
     paths:
-      - 'fedora-coreos-uki/**'
-      - '.github/workflows/fedora-coreos-uki.yml'
+      - 'fcos-uki/**'
+      - '.github/workflows/fcos-uki.yml'
   push:
     branches:
       - main
     paths:
-      - 'fedora-coreos-uki/**'
-      - '.github/workflows/fedora-coreos-uki.yml'
+      - 'fcos-uki/**'
+      - '.github/workflows/fcos-uki.yml'
   schedule:
     - cron: '0 4 * * *'
   workflow_dispatch:
