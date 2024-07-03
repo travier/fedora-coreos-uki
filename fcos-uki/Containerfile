@@ -20,17 +20,25 @@ ADD ostree-sign.pub /etc/ostree/initramfs-root-binding.key
 # Regenerate the initrd
 RUN ...
 
-# Generate UKI
-RUN ukify build \
-    --linux=/usr/lib/modules/*/vmlinuz \
-    --initrd=/usr/lib/modules/*/initramfs.img \
-    --cmdline="$(cat /boot/loader/entries/ostree-1.conf | grep options | sed "s/options //" | sed "s/ostree=.*//")"
+# Generate UKI & sign it for Secure Boot
+RUN --mont-type=secret,id=key,target=/run/key \
+    --mont-type=secret,id=cert,target=/run/cert \
+    cmdline="$(cat /boot/loader/entries/ostree-1.conf | grep options | sed "s/options //" | sed "s/ostree=.*//")" \
+    && \
+    ukify build \
+        --linux /usr/lib/modules/*/vmlinuz \
+        --initrd /usr/lib/modules/*/initramfs.img \
+        --cmdline "${cmdline}" \
+        --os-release /etc/os-release \
+        --signtool sbsign \
+        --secureboot-private-key /run/key \
+        --secureboot-certificate /run/cert \
+        --output /usr/lib/modules/*/uki \
+        --measure \
+        --json pretty
 
-# Remove kernel & initramfs
+# Remove now unneeded kernel & initramfs
 RUN rm /usr/lib/modules/*/vmlinuz /usr/lib/modules/*/initramfs.img
-
-# Sign UKI with Secure Boot key
-RUN --mont-type=secret, ...
 
 # Import UKI into ostree repo & create a new commit
 RUN ostree container commit
