@@ -17,12 +17,17 @@ RUN install -dm 0755 -o 0 -g 0 /usr/lib/ostree \
 # Import ostree commit signing public key
 ADD ostree-sign.pub /etc/ostree/initramfs-root-binding.key
 
-# Regenerate the initrd
-RUN ...
+# Regenerate the initrd using dracut
+RUN export KERNEL_VERSION="$(rpm -qa kernel --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')" && \
+    stock_arguments=$(lsinitrd "/lib/modules/${KERNEL_VERSION}/initramfs.img"  | grep '^Arguments: ' | sed 's/^Arguments: //') && \
+    mkdir -p /tmp/dracut /var/roothome && \
+    bash <(/usr/bin/echo "dracut $stock_arguments") && \
+    rm -rf /var/* /tmp/*  && \
+    mv -v /boot/initramfs*.img "/lib/modules/${KERNEL_VERSION}/initramfs.img" && \
 
 # Generate UKI & sign it for Secure Boot
-RUN --mont-type=secret,id=key,target=/run/key \
-    --mont-type=secret,id=cert,target=/run/cert \
+RUN --mount=type=secret,id=key \
+    --mount=type=secret,id=cert \
     cmdline="$(cat /boot/loader/entries/ostree-1.conf | grep options | sed "s/options //" | sed "s/ostree=.*//")" \
     && \
     ukify build \
@@ -31,8 +36,8 @@ RUN --mont-type=secret,id=key,target=/run/key \
         --cmdline "${cmdline}" \
         --os-release /etc/os-release \
         --signtool sbsign \
-        --secureboot-private-key /run/key \
-        --secureboot-certificate /run/cert \
+        --secureboot-private-key /run/secrets/key \
+        --secureboot-certificate /run/secrets/cert \
         --output /usr/lib/modules/*/uki \
         --measure \
         --json pretty
@@ -44,4 +49,5 @@ RUN rm /usr/lib/modules/*/vmlinuz /usr/lib/modules/*/initramfs.img
 RUN ostree container commit
 
 # Sign ostree commit
-RUN ...
+RUN --mont-type=secret,id=key,target=/run/key \
+    ostree sign --keys-file /run/secrets/ostree ${commit} --repo=/ostree/repo
