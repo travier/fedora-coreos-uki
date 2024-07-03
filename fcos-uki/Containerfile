@@ -6,9 +6,8 @@ LABEL org.opencontainers.image.source="https://github.com/travier/fedora-coreos-
 LABEL org.opencontainers.image.licenses="MIT"
 
 # RUN rpm-ostree install dnf
-
-# Copy custom config to /usr & /etc
-COPY usr usr
-COPY etc etc
+RUN install -dm 0755 -o 0 -g 0 /usr/lib/ostree \
+    && \
+    echo -n "[composefs]\nenabled = yes\n" > /usr/lib/ostree/prepare-root.conf
 
 RUN ostree container commit
