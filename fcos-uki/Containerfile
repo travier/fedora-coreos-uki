@@ -49,10 +49,10 @@ LABEL org.opencontainers.image.source="https://github.com/travier/fedora-coreos-
 LABEL org.opencontainers.image.licenses="MIT"
 
 # Copy bandwhich from builder container
-COPY --from=ukibuilder /boot/uki /usr/lib/modules/uki
+COPY --from=ukibuilder /boot/uki /usr/lib/modules/uki/uki
 
 # Import UKI into ostree repo & create a new signed commit
-RUN --mount=type=secret,id=key \
+RUN --mount=type=secret,id=ostree \
     ostree container commit && \
     ostree commit \
         --repo=/ostree/repo \
