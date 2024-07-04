@@ -1,0 +1,7 @@
+[allowlist]
+description = "Global Allowlist"
+
+# Ignore test Secure Boot keys
+paths = [
+'''\/secureboot\/keys\/.*\/.*\.key$''',
+]
