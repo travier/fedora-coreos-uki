@@ -55,7 +55,8 @@ COPY --from=ukibuilder /boot/uki /usr/lib/modules/uki/uki
 RUN --mount=type=secret,id=ostree \
     ostree container commit && \
     ostree commit \
-        --repo=/ostree/repo \
+        --repo /ostree/repo \
+        --base "fedora/x86_64/coreos/stable" \
         --branch "fedora/x86_64/coreos/stable" \
         --subject "UKI" \
         --sign-type ed25519 \
