@@ -8,7 +8,9 @@ LABEL org.opencontainers.image.licenses="MIT"
 # Install the required tools
 RUN rpm-ostree install \
         sbsigntools \
+        systemd-boot-unsigned \
         systemd-ukify
+
 # Setup composefs for signed mode
 RUN install -dm 0755 -o 0 -g 0 /usr/lib/ostree && \
     echo -n "[composefs]\nenabled=signed\n" > /usr/lib/ostree/prepare-root.conf
