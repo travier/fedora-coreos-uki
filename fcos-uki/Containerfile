@@ -22,7 +22,7 @@ RUN export KERNEL_VERSION="$(rpm -qa kernel --queryformat '%{VERSION}-%{RELEASE}
     mkdir -p /tmp/dracut /var/roothome && \
     bash <(/usr/bin/echo "dracut $stock_arguments") && \
     rm -rf /var/* /tmp/*  && \
-    mv -v /boot/initramfs*.img "/lib/modules/${KERNEL_VERSION}/initramfs.img" && \
+    mv -v /boot/initramfs*.img "/lib/modules/${KERNEL_VERSION}/initramfs.img"
 
 # Generate UKI & sign it for Secure Boot
 RUN --mount=type=secret,id=key \
