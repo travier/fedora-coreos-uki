@@ -10,7 +10,7 @@ main() {
     PUBKEY="$(openssl pkey -outform DER -pubout -in "${key_file}" | tail -c 32 | base64)"
 
     # Write the pubkey
-    echo "${PUBKEY}" > "./fcos-uki/${key_file}.pub"
+    echo "${PUBKEY}" > "${key_file}.pub"
 
     # Convert the private key to base64 for ostree signing
     # Extract the seed

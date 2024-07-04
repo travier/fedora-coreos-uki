@@ -1,9 +1,4 @@
-FROM quay.io/fedora/fedora-coreos:stable
-
-LABEL org.opencontainers.image.title="Fedora CoreOS"
-LABEL org.opencontainers.image.description="Fedora CoreOS UKI"
-LABEL org.opencontainers.image.source="https://github.com/travier/fedora-coreos-uki"
-LABEL org.opencontainers.image.licenses="MIT"
+FROM quay.io/fedora/fedora-coreos:stable as ukibuilder
 
 # Install the required tools
 RUN rpm-ostree install \
@@ -16,7 +11,8 @@ RUN install -dm 0755 -o 0 -g 0 /usr/lib/ostree && \
     echo -n "[composefs]\nenabled=signed\n" > /usr/lib/ostree/prepare-root.conf
 
 # Import ostree commit signing public key
-ADD ostree-sign.pub /etc/ostree/initramfs-root-binding.key
+RUN --mount=type=secret,id=ostreepub \
+    cp /run/secrets/ostreepub /etc/ostree/initramfs-root-binding.key
 
 # Regenerate the initrd using dracut
 RUN export KERNEL_VERSION="$(rpm -qa kernel --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')" && \
@@ -38,16 +34,31 @@ RUN --mount=type=secret,id=key \
         --signtool sbsign \
         --secureboot-private-key "/run/secrets/key" \
         --secureboot-certificate "/run/secrets/cert" \
-        --output "/usr/lib/modules/${KERNEL_VERSION}/uki" \
+        --output "/boot/uki" \
         --measure \
         --json pretty
 
 # Remove now unneeded kernel & initramfs
-RUN rm -vf /usr/lib/modules/*/vmlinuz /usr/lib/modules/*/initramfs.img
+# RUN rm -vf /usr/lib/modules/*/vmlinuz /usr/lib/modules/*/initramfs.img
 
-# Import UKI into ostree repo & create a new commit
-RUN ostree container commit
+FROM quay.io/fedora/fedora-coreos:stable
 
-# Sign ostree commit
-RUN --mont=type=secret,id=key \
-    ostree sign --keys-file /run/secrets/ostree ${commit} --repo=/ostree/repo
+LABEL org.opencontainers.image.title="Fedora CoreOS"
+LABEL org.opencontainers.image.description="Fedora CoreOS UKI"
+LABEL org.opencontainers.image.source="https://github.com/travier/fedora-coreos-uki"
+LABEL org.opencontainers.image.licenses="MIT"
+
+# Copy bandwhich from builder container
+COPY --from=ukibuilder /boot/uki /usr/lib/modules/uki
+
+# Import UKI into ostree repo & create a new signed commit
+RUN --mount=type=secret,id=key \
+    ostree container commit && \
+    ostree commit \
+        --repo=/ostree/repo \
+        --branch "fedora/x86_64/coreos/stable" \
+        --subject "UKI" \
+        --sign-type ed25519 \
+        --sign-from-file="/run/secrets/ostree" \
+        --bootable \
+        /usr/lib/modules/uki
