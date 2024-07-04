@@ -28,11 +28,10 @@ RUN export KERNEL_VERSION="$(rpm -qa kernel --queryformat '%{VERSION}-%{RELEASE}
 RUN --mount=type=secret,id=key \
     --mount=type=secret,id=cert \
     KERNEL_VERSION="$(rpm -qa kernel --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')" \
-    cmdline="$(cat /boot/loader/entries/ostree-1.conf | grep options | sed "s/options //" | sed "s/ostree=.*//")" && \
     ukify build \
         --linux "/usr/lib/modules/${KERNEL_VERSION}/vmlinuz" \
         --initrd "/usr/lib/modules/${KERNEL_VERSION}/initramfs.img" \
-        --cmdline "${cmdline}" \
+        --cmdline "mitigations=auto,nosmt ignition.platform.id=qemu console=tty0 console=ttyS0,115200n8 ignition.firstboot" \
         --os-release "/etc/os-release" \
         --signtool sbsign \
         --secureboot-private-key "/run/secrets/key" \
