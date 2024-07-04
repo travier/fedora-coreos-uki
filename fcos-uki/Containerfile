@@ -49,5 +49,5 @@ RUN rm -vf /usr/lib/modules/*/vmlinuz /usr/lib/modules/*/initramfs.img
 RUN ostree container commit
 
 # Sign ostree commit
-RUN --mont-type=secret,id=key,target=/run/key \
+RUN --mont=type=secret,id=key \
     ostree sign --keys-file /run/secrets/ostree ${commit} --repo=/ostree/repo
