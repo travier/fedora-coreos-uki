@@ -27,7 +27,7 @@ RUN export KERNEL_VERSION="$(rpm -qa kernel --queryformat '%{VERSION}-%{RELEASE}
 # Generate UKI & sign it for Secure Boot
 RUN --mount=type=secret,id=key \
     --mount=type=secret,id=cert \
-    KERNEL_VERSION="$(rpm -qa kernel --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')" \
+    export KERNEL_VERSION="$(rpm -qa kernel --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')" && \
     ukify build \
         --linux "/usr/lib/modules/${KERNEL_VERSION}/vmlinuz" \
         --initrd "/usr/lib/modules/${KERNEL_VERSION}/initramfs.img" \
