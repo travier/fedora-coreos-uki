@@ -7,8 +7,7 @@ RUN rpm-ostree install \
         systemd-ukify
 
 # Setup composefs for signed mode
-RUN install -dm 0755 -o 0 -g 0 /usr/lib/ostree && \
-    echo -n "[composefs]\nenabled=signed\n" > /usr/lib/ostree/prepare-root.conf
+RUN echo -n "[composefs]\nenabled=signed\n" > /usr/lib/ostree/prepare-root.conf
 
 # Import ostree commit signing public key
 RUN --mount=type=secret,id=ostreepub \
@@ -49,7 +48,7 @@ LABEL org.opencontainers.image.source="https://github.com/travier/fedora-coreos-
 LABEL org.opencontainers.image.licenses="MIT"
 
 # Copy bandwhich from builder container
-COPY --from=ukibuilder /boot/uki /usr/lib/modules/uki/uki
+COPY --from=ukibuilder /boot/uki /tmp/rootfs/usr/lib/modules/uki
 
 # Import UKI into ostree repo & create a new signed commit
 RUN --mount=type=secret,id=ostree \
@@ -62,4 +61,4 @@ RUN --mount=type=secret,id=ostree \
         --sign-type ed25519 \
         --sign-from-file="/run/secrets/ostree" \
         --bootable \
-        /usr/lib/modules/uki
+        /tmp/rootfs
