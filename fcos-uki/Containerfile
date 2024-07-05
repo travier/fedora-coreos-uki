@@ -7,7 +7,7 @@ RUN rpm-ostree install \
         systemd-ukify
 
 # Setup composefs for signed mode
-RUN echo -n "[composefs]\nenabled=signed\n" > /usr/lib/ostree/prepare-root.conf
+RUN echo -e "[composefs]\nenabled=signed" > /usr/lib/ostree/prepare-root.conf
 
 # Import ostree commit signing public key
 RUN --mount=type=secret,id=ostreepub \
