@@ -52,6 +52,7 @@ COPY --from=ukibuilder /boot/uki /tmp/rootfs/usr/lib/modules/uki
 
 # Import UKI into ostree repo & create a new signed commit
 RUN --mount=type=secret,id=ostree \
+    export OSTREE_EXP_WRITE_BARE_SPLIT_XATTRS=true && \
     ostree container commit && \
     ostree commit \
         --repo /ostree/repo \
