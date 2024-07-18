@@ -1,6 +1,6 @@
 # Fedora CoreOS UKI PoC
 
-WIP
+[quay.io/travier/fcos-uki:latest](https://quay.io/repository/travier/fcos-uki).
 
 ## License
 
