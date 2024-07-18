@@ -51,8 +51,9 @@ LABEL org.opencontainers.image.licenses="MIT"
 COPY --from=ukibuilder /boot/uki /tmp/rootfs/usr/lib/modules/uki
 
 # Import UKI into ostree repo & create a new signed commit
-# ostree container commit && \
 RUN --mount=type=secret,id=ostree \
+    export KERNEL_VERSION="$(rpm -qa kernel --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')" && \
+    ln /tmp/rootfs/usr/lib/modules/uki "/lib/modules/${KERNEL_VERSION}" && \
     export OSTREE_EXP_WRITE_BARE_SPLIT_XATTRS=true && \
     ostree commit \
         --repo /ostree/repo \
@@ -62,4 +63,6 @@ RUN --mount=type=secret,id=ostree \
         --sign-type ed25519 \
         --sign-from-file="/run/secrets/ostree" \
         --bootable \
-        /tmp/rootfs
+        /tmp/rootfs && \
+    rm -rf /tmp/rootfs && \
+    ostree container commit
