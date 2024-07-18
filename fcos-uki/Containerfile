@@ -51,13 +51,12 @@ LABEL org.opencontainers.image.licenses="MIT"
 COPY --from=ukibuilder /boot/uki /tmp/rootfs/usr/lib/modules/uki
 
 # Import UKI into ostree repo & create a new signed commit
+# ostree container commit && \
 RUN --mount=type=secret,id=ostree \
     export OSTREE_EXP_WRITE_BARE_SPLIT_XATTRS=true && \
-    ostree container commit && \
-    ostree refs && \
     ostree commit \
         --repo /ostree/repo \
-        --base "fedora:fedora/x86_64/coreos/stable" \
+        --base "$(ostree rev-parse --single)" \
         --branch "fedora/x86_64/coreos/stable" \
         --subject "UKI" \
         --sign-type ed25519 \
