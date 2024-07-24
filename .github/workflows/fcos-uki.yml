@@ -81,8 +81,8 @@ jobs:
           oci: true
           labels: org.opencontainers.image.version=${{ steps.version.outputs.version }}
           extra-args: |
-            --secret=id=key,src=secureboot/keys/KEK/KEK.key
-            --secret=id=cert,src=secureboot/keys/KEK/KEK.pem
+            --secret=id=key,src=secureboot/keys/db/db.key
+            --secret=id=cert,src=secureboot/keys/db/db.pem
             --secret=id=ostree,src=ostree-sign.key
             --secret=id=ostreepub,src=ostree-sign.pub
 
