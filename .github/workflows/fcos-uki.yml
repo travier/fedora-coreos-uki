@@ -46,7 +46,7 @@ jobs:
       - name: Reclaim disk space
         run: |
           sudo docker image prune --all --force
-          sudo rm -rf "/usr/local/lib/android"
+          # sudo rm -rf "/usr/local/lib/android"
 
       - name: Figure out version
         id: version
