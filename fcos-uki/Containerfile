@@ -28,7 +28,7 @@ RUN --mount=type=secret,id=key \
     ukify build \
         --linux "/usr/lib/modules/${KERNEL_VERSION}/vmlinuz" \
         --initrd "/usr/lib/modules/${KERNEL_VERSION}/initramfs.img" \
-        --cmdline "mitigations=auto,nosmt ignition.platform.id=qemu console=tty0 console=ttyS0,115200n8 ignition.firstboot" \
+        --cmdline "rw mitigations=auto,nosmt ignition.platform.id=qemu console=tty0 console=ttyS0,115200n8 ignition.firstboot" \
         --os-release "/etc/os-release" \
         --signtool sbsign \
         --secureboot-private-key "/run/secrets/key" \
