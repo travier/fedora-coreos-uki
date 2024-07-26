@@ -43,6 +43,11 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      - name: Reclaim disk space
+        run: |
+          docker image prune --all --force
+          rm -rfv "/usr/local/lib/android"
+
       - name: Figure out version
         id: version
         run: |
