@@ -22,13 +22,14 @@ RUN export KERNEL_VERSION="$(rpm -qa kernel --queryformat '%{VERSION}-%{RELEASE}
     mv -v /boot/initramfs*.img "/lib/modules/${KERNEL_VERSION}/initramfs.img"
 
 # Generate UKI & sign it for Secure Boot
+# Find another way to signal Ignition first boot than kargs (file in /boot?)
 RUN --mount=type=secret,id=key \
     --mount=type=secret,id=cert \
     export KERNEL_VERSION="$(rpm -qa kernel --queryformat '%{VERSION}-%{RELEASE}.%{ARCH}')" && \
     ukify build \
         --linux "/usr/lib/modules/${KERNEL_VERSION}/vmlinuz" \
         --initrd "/usr/lib/modules/${KERNEL_VERSION}/initramfs.img" \
-        --cmdline "rw mitigations=auto,nosmt ignition.platform.id=qemu console=tty0 console=ttyS0,115200n8 ignition.firstboot" \
+        --cmdline "rw mitigations=auto,nosmt ignition.platform.id=qemu console=tty0 console=ttyS0,115200n8" \
         --os-release "/etc/os-release" \
         --signtool sbsign \
         --secureboot-private-key "/run/secrets/key" \
