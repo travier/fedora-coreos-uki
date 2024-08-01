@@ -24,6 +24,10 @@ podman rmi quay.io/travier/fedora-coreos-uki:uki
 sudo mount -o remount,rw /boot
 sudo mv uki /boot/ostree/uki
 
+sudo ln -snf boot.0 /ostree/boot.1
+sudo ln -snf boot.1 /ostree/boot.0
+ls -alh /ostree/
+
 sync
 sudo reboot
 
@@ -50,6 +54,11 @@ scp uki ${host}:
 ssh ${host}
 sudo mount -o remount,rw /boot
 sudo mv uki /boot/ostree/uki
+
+
+mount /dev/vda4 /sysroot
+mount /dev/vda3 /sysroot/boot
+/sysroot/boot/ostree-prepare-root /sysroot
 
 
 ```
