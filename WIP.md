@@ -1,35 +1,51 @@
+
+# Add grub entries for the UKI and uefi shell
+
 sudo mount -o remount,rw /boot
 Update /boot/grub2/grub.cfg & /boot/grub2/uki.cfg
 
+# turn on fsverity on filesystem
 sudo tune2fs -O verity /dev/vda4
+# apply the fs-verity to the files
 sudo ostree admin post-copy
 
+# tell ostree to verify composeFS 
 echo -e "[composefs]\nenabled=signed" > /etc/ostree/prepare-root.conf
 
+# create a new mount namespace
 sudo unshare -m
+# remount /sysroot to writeable
 mount -o remount,rw /sysroot
+# get version from container image (e.g 40.20240827.dev.0)
 osversion="$(skopeo inspect docker://quay.io/travier/fedora-coreos-uki:latest | jq -r '.Labels."org.opencontainers.image.version"')"
+# extract ostree commit from image to a new reference : fedora/coreos/uki/$version.
 ostree container unencapsulate \
   --repo /sysroot/ostree/repo \
   --write-ref "fedora/coreos/uki/${osversion}" \
   ostree-unverified-image:registry:quay.io/travier/fedora-coreos-uki:latest
 
+# deploy the ostree commit we just unencapsulated
 ostree admin deploy --stage "fedora/coreos/uki/${osversion}"
-exit
 
+# container to extract the UKI
 podman create --name uki quay.io/travier/fedora-coreos-uki:uki
 podman cp uki:/uki uki
 podman rm -f uki
 podman rmi quay.io/travier/fedora-coreos-uki:uki
+# copy the uki to /boot
 sudo mount -o remount,rw /boot
 sudo mv uki /boot/ostree/uki
 
+# Fix missing entry (the UKI will try to boot ostree/boot.1)
+cd /ostree
 sudo ln -snf boot.0 /ostree/boot.1
 sudo ln -snf boot.1 /ostree/boot.0
 ls -alh /ostree/
 
 sync
 sudo reboot
+
+# below are steps to build the UKI
 
 host="uki2.devel"
 commit="669ba406ac3da677b290b550cb254a25864c3fecd890c7658916f40d7b0f8804"
