@@ -6,6 +6,8 @@ Update /boot/grub2/grub.cfg & /boot/grub2/uki.cfg
 
 # turn on fsverity on filesystem
 sudo tune2fs -O verity /dev/vda4
+# enable fsverity in the ostree repo
+ostree config set ex-fsverity.required true
 # apply the fs-verity to the files
 sudo ostree admin post-copy
 
@@ -39,7 +41,7 @@ sudo mv uki /boot/ostree/uki
 # Fix missing entry (the UKI will try to boot ostree/boot.1)
 cd /ostree
 sudo ln -snf boot.0 /ostree/boot.1
-sudo ln -snf boot.1 /ostree/boot.0
+sudo ln -snf /ostree/boot.0.0 boot.1
 ls -alh /ostree/
 
 sync
@@ -88,3 +90,6 @@ https://github.com/ostreedev/ostree-rs-ext/pull/556
 ```
 error: Staging deployment: Initializing deployment: Checking out deployment tree: Generated composefs image digest (573ad0fe84d7f61d2d632fee995c29acf3d72311eeed775b1f9a5af4dfb33001) doesn't match expected digest (172eb44f9640fdbc756a1570cc0ad8fb1a41f4b3f21dce4232b04112e7fcd8d2)
 ```
+
+---
+
