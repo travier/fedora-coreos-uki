@@ -1,0 +1,16 @@
+
+enable fs verity on ext4 (tune2fs)
+
+ostree config set ex-fsverity.required true
+
+ostree unencapsulate 
+ostree deploy
+sudo ostree admin post-copy
+
+reboot on regular ostree deployment
+
+Update /boot/grub2/grub.cfg & /boot/grub2/uki.cfg
+install uki in /boot
+fix links in /ostree/
+
+reboot on UKI
