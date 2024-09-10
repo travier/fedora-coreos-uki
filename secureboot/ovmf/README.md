@@ -7,10 +7,13 @@ cp /usr/share/edk2/ovmf/OVMF_VARS.secboot.fd .
 
 # Inject secureboot cert
 
+IMPORTANT NOTE: at least for libvirt, this must be regenerated each
+time you create a VM. SELinux labels change and the the VM silently ignore 
+the custom vars on subsequent uses. 
 ```
 dnf install python3-virt-firmware
 
-GUID=$cat(../GUID)
+GUID=$(cat ../GUID)
 virt-fw-vars --input /run/host/usr/share/edk2/ovmf/OVMF_VARS.secboot.fd \
   --secure-boot  \
   --set-pk $GUID ../keys/PK/PK.pem \

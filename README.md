@@ -4,9 +4,13 @@
 # How to reproduce
 
 ## Get a secureboot VM
-See under secureboot
+See under [secureboot](./secureboot)
 
-just run `curl https://raw.githubusercontent.com/travier/fedora-coreos-uki/main/magic.sh | bash` as root.
+This requires the root disk to be formatted in ext.4. 
+See [uki.bu](./uki.bu)
+
+Run `curl https://raw.githubusercontent.com/travier/fedora-coreos-uki/main/magic.sh | bash` as root.
+
 ## 1 setup systemdboot
 
 ```
