@@ -1,0 +1,43 @@
+[root@fcos-uki core]# rpm-ostree status
+State: idle
+Deployments:
+● fedora/coreos/uki/40.20240903.dev.0
+                  Version: 40.20240903.dev.0 (2024-09-03T04:12:01Z)
+                   Commit: 9cc8017e85dd5046b029d1776266d752a5f4dbcc201e41567fef441a979941c0
+
+  fedora:fedora/x86_64/coreos/stable
+                  Version: 40.20240701.3.0 (2024-07-16T16:03:29Z)
+                   Commit: 45982eca152d020f23a547813538939e9bfdcfefc8c059e88970d1bbf4ada0bb
+             GPGSignature: Valid signature by 115DF9AEF857853EE8445D0A0727707EA15B79CC
+[root@fcos-uki core]# journalctl --no-pager -o cat -u ostree-prepare-root.service 
+Starting ostree-prepare-root.service - OSTree Prepare OS/...
+Resolved OSTree target to: /sysroot/ostree/deploy/fedora-coreos/deploy/45982eca152d020f23a547813538939e9bfdcfefc8c059e88970d1bbf4ada0bb.0
+Found legacy sysroot.readonly flag, not configured in ostree/prepare-root.conf
+sysroot.readonly configuration value: 1 (fs writable: 1)
+composefs: No image present
+Using legacy ostree bind mount for /
+Finished ostree-prepare-root.service - OSTree Prepare OS/.
+Starting ostree-prepare-root.service - OSTree Prepare OS/...
+Resolved OSTree target to: /sysroot/ostree/deploy/fedora-coreos/deploy/9cc8017e85dd5046b029d1776266d752a5f4dbcc201e41567fef441a979941c0.0
+sysroot.readonly configuration value: 1 (fs writable: 1)
+composefs+ostree: Validated commit signature using '/etc/ostree/initramfs-root-binding.key'
+composefs: Verifying digest: 6ba1f6a92ce9fe63d0a70c3701ba5030eab5d3ac98ce096352a51d168eb4647d
+composefs: mounted successfully
+Finished ostree-prepare-root.service - OSTree Prepare OS/.
+
+[root@fcos-uki core]# ls -i /ostree/deploy/fedora-coreos/deploy/9cc8017e85dd5046b029d1776266d752a5f4dbcc201e41567fef441a979941c0.0/usr/lib/os-release 
+411793 /ostree/deploy/fedora-coreos/deploy/9cc8017e85dd5046b029d1776266d752a5f4dbcc201e41567fef441a979941c0.0/usr/lib/os-release
+
+[root@fcos-uki core]# find /ostree/repo/objects/ -inum 411793
+/ostree/repo/objects/f2/e6c47f90aa7d9cc2e01efa46ae0d1ac6cccc5168cb76d76d01c0c811bbbb7d.file
+[root@fcos-uki core]# 
+[root@fcos-uki core]# mount -o remount,rw /sysroot  
+
+[root@fcos-uki core]# echo tampered > /sysroot/ostree/repo/objects/f2/e6c47f90aa7d9cc2e01efa46ae0d1ac6cccc5168cb76d76d01c0c811bbbb7d.file
+bash: /sysroot//ostree/repo/objects/f2/e6c47f90aa7d9cc2e01efa46ae0d1ac6cccc5168cb76d76d01c0c811bbbb7d.file: Operation not permitted
+
+# with vi : 
+"/sysroot/ostree/repo/objects/f2/e6c47f90aa7d9cc2e01efa46ae0d1ac6cccc5168cb76d76
+d01c0c811bbbb7d.file" E166: Can't open linked file for writing
+
+
