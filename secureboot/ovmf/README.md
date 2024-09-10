@@ -10,13 +10,13 @@ cp /usr/share/edk2/ovmf/OVMF_VARS.secboot.fd .
 ```
 dnf install python3-virt-firmware
 
-# without copying first, using qcow2 template
-virt-fw-vars --input /run/host/usr/share/edk2/ovmf/OVMF_VARS_4M.secboot.qcow2 \
+GUID=$cat(../GUID)
+virt-fw-vars --input /run/host/usr/share/edk2/ovmf/OVMF_VARS.secboot.fd \
   --secure-boot  \
   --set-pk $GUID ../keys/PK/PK.pem \
   --add-kek $GUID ../keys/KEK/KEK.pem \
   --add-db $GUID ../keys/db/db.pem \
-  -o VARS_CUSTOM.qcow2 
+  -o VARS_CUSTOM.secboot.fd 
 ```
 
 # Start VM

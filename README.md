@@ -19,10 +19,6 @@ bootctl install
 # default sd-boot is 0 and default will boot firmware
 echo "timeout 30" >> /boot/efi/loader/loader.conf
 
-# get systemd boot signed with our SB key
-curl https://raw.githubusercontent.com/travier/fedora-coreos-uki/main/secureboot/systemd-bootx64-signed.efi \
-  --output /boot/efi/EFI/systemd/systemd-bootx64.efi
-
 ```
 ## 2 Download signed composeFS fedora coreOS 
 
@@ -62,6 +58,7 @@ ostree admin post-copy
 # container to extract the UKI
 podman create --name uki quay.io/travier/fedora-coreos-uki:uki
 podman cp uki:/uki uki
+podman cp uki:/systemd-bootx64-signed.efi systemd-bootx64-signed.efi
 podman rm -f uki
 podman rmi quay.io/travier/fedora-coreos-uki:uki
 
@@ -70,6 +67,9 @@ mount -o remount,rw /boot
 machine_id=$(cat /etc/machine-id)
 kernelver=$(uname -r)
 mv uki /boot/efi/EFI/Linux/$machine_id-$kernelver.efi
+
+# copy the signed systemd-boot
+mv systemd-bootx64-signed.efi /boot/efi/EFI/systemd/systemd-bootx64.efi
 ```
 Reboot !
 

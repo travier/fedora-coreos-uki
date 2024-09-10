@@ -6,7 +6,7 @@ IMAGE="$HOME/Downloads/fedora-coreos-40.20240701.3.0-qemu.x86_64.qcow2"
 
 IGNITION_CONFIG="$HOME/cosa/ign-configs/ssh-and-autologin.ign"
 
-SB_VARS=$(pwd)/ovmf/VARS_CUSTOM.fd
+SB_VARS=$(pwd)/ovmf/VARS_CUSTOM.secboot.fd
 #SB_VARS=/var/lib/libvirt/images/VARS_CUSTOM.fd
 SB_VARS_TEMPLATE=/usr/share/edk2/ovmf/OVMF_VARS.secboot.fd
 SB_CODE=/usr/share/OVMF/OVMF_CODE.secboot.fd
