@@ -1,0 +1,25 @@
+#!/bin/bash
+set -euo pipefail
+# Setup the UKI and bootloader in the EFI system partition
+# - pull uki container
+# - extract SB signed EFI binaries : 
+#    - UKI
+#    - systemd-boot
+# - copy ukis and sd-boot to the well known location in EFI
+
+podman create --name uki quay.io/travier/fedora-coreos-uki:uki
+podman cp uki:/uki uki
+podman cp uki:/uki.1 uki.1
+podman cp uki:/systemd-bootx64-signed.efi systemd-bootx64-signed.efi
+podman rm -f uki
+podman rmi quay.io/travier/fedora-coreos-uki:uki
+
+# Craft a filename
+source /etc/os-release
+kernelver=$(uname -r)
+
+# Copy SB signed UKIs and systemd-boot to expected locations
+# in the EFI partition
+mv -v uki /boot/efi/EFI/Linux/2-"$OSTREE_VERSION"-"$kernelver".efi
+mv -v uki.1 /boot/efi/EFI/Linux/1-"$OSTREE_VERSION"-"$kernelver".efi
+mv -v systemd-bootx64-signed.efi /boot/efi/EFI/systemd/systemd-bootx64.efi

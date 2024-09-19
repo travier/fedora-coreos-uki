@@ -1,0 +1,23 @@
+#!/bin/bash
+echo 3 > /proc/sys/vm/drop_caches
+F=$1
+D=/dev/disk/by-partlabel/root
+B=$(debugfs -R "bmap $F 0" $D 2>/dev/null)
+# In bytes:
+BB=$(($B*4096))
+echo $F is at offset on device $D
+echo Original initial block:
+dd if=$D bs=1 skip=$BB count=32 2> /dev/null
+echo
+echo
+echo Modifying initial block
+echo -n FOOBAR | dd of=$D bs=1 seek=$(($BB+6)) 2> /dev/null
+echo
+echo Modified initial block:
+dd if=$D bs=1 skip=$BB count=32 2> /dev/null
+echo
+echo
+sync
+sleep 0.1
+echo 3 > /proc/sys/vm/drop_caches
+

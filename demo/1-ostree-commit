@@ -1,0 +1,29 @@
+#!/bin/bash
+set -euxo pipefail
+
+# enable FS verity on the root filesystem
+tune2fs -O verity /dev/disk/by-partlabel/root
+# enable fsverity on the ostree repo
+ostree config set ex-fsverity.required true
+
+
+# we nned write access to /sysroot
+mount -o remount,rw /sysroot
+
+# First, we populate the ostree repo with our signed commit
+
+# get the build id
+osversion="$(skopeo inspect docker://quay.io/travier/fedora-coreos-uki:latest | jq -r '.Labels."org.opencontainers.image.version"')"
+
+ostree container unencapsulate \
+  --repo /sysroot/ostree/repo \
+  --write-ref "fedora/coreos/uki/${osversion}" \
+  ostree-unverified-image:oci-archive:coreos-signed
+  #ostree-unverified-image:registry:quay.io/travier/fedora-coreos-uki:latest
+
+# Then we create a deployement with the above commit
+ostree admin deploy --stage "fedora/coreos/uki/${osversion}"
+
+# Add fs-verity digests to all the files metadata
+ostree admin post-copy
+

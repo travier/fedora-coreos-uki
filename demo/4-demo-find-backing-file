@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# find current deployed ref
+ref=$(rpm-ostree status -b --json | jq -r '.deployments[0].origin')
+
+F=$1
+C=$(ostree ls -C "$ref" "$F" | awk "{print \$5}")
+echo The repo file for $F is:
+echo /ostree/repo/objects/${C:0:2}/${C:2}.file

@@ -1,0 +1,24 @@
+#!/bin/bash
+set -euxo pipefail
+
+# Here we set up systemd boot: 
+# - download and install the package in a transient overlay
+# - run the provided install tool (create EFI entry and copy binaries)
+# - overwrite the systemd-boot EFI binary with our signed one
+
+# Download the RPM (not included in coreOS by default)
+
+curl -L https://dl.fedoraproject.org/pub/fedora/linux/updates/40/Everything/x86_64/Packages/s/systemd-boot-unsigned-255.12-1.fc40.x86_64.rpm \
+  --output systemd-boot-unsigned.rpm
+
+# Enable a transient overlay on /usr
+rpm-ostree usroverlay
+# Install
+rpm -i systemd-boot-unsigned.rpm
+
+# We need a writeable EFI partition
+sudo mount /dev/disk/by-partlabel/EFI-SYSTEM /boot/efi
+
+bootctl install
+# default sd-boot timeout is 0 
+echo "timeout 10" >> /boot/efi/loader/loader.conf
