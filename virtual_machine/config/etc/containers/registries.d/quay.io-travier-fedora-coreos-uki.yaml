@@ -1,0 +1,3 @@
+docker:
+  quay.io/travier/fedora-coreos-uki:
+    use-sigstore-attachments: true

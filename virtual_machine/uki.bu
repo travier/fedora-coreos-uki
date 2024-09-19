@@ -36,6 +36,8 @@ storage:
       wipe_filesystem: true
       format: ext4
       label: root
+  trees:
+    - local: config
 systemd:
   units:
     - name: zincati.service
