@@ -1,0 +1,53 @@
+variant: fcos
+version: 1.5.0
+passwd:
+  users:
+    - name: core
+      password_hash: $y$j9T$2vC92J18j8gnYdABx/i3a.$B3O3XJ3JT5nbWlpZfsX/H.sSdlPxClO6aD.zx.5zS68
+      ssh_authorized_keys:
+        - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFcf4JfS0+rJwI+hI0XN9HRZq0rWi/ACfetLfwpKLOpn tim@phoenix
+        - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGDDfYmFvcwedB6m4wraEGbMFx/sphbV49Xt83K1E6mX jib@banana
+storage:
+  disks:
+  - device: /dev/disk/by-diskseq/1
+  #- device: /dev/disk/by-label/root
+    # We need a bigger ESP partition size for UKIs
+    wipe_table: true
+    partitions:
+    - number: 1
+      label: EFI-SYSTEM
+      type_guid: c12a7328-f81f-11d2-ba4b-00a0c93ec93b
+      size_mib: 1024
+    - number: 2
+      label: boot
+      size_mib: 512
+    - number: 3   
+      label: root
+  filesystems:
+    - device: /dev/disk/by-partlabel/EFI-SYSTEM
+      wipe_filesystem: true
+      format: vfat
+      label: EFI-SYSTEM
+    - device: /dev/disk/by-partlabel/boot
+      wipe_filesystem: true
+      format: ext4
+      label: boot
+    - device: /dev/disk/by-partlabel/root
+      wipe_filesystem: true
+      format: ext4
+      label: root
+systemd:
+  units:
+    - name: zincati.service
+      enabled: false
+      mask: true
+    - name: serial-getty@ttyS0.service
+      dropins:
+      - name: autologin-core.conf
+        contents: |
+          [Service]
+          # Override Execstart in main unit
+          ExecStart=
+          # Add new Execstart with `-` prefix to ignore failure`
+          ExecStart=-/usr/sbin/agetty --autologin core --noclear %I $TERM
+

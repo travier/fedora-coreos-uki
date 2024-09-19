@@ -1,0 +1,80 @@
+{
+  "ignition": {
+    "version": "3.4.0"
+  },
+  "passwd": {
+    "users": [
+      {
+        "name": "core",
+        "passwordHash": "$y$j9T$2vC92J18j8gnYdABx/i3a.$B3O3XJ3JT5nbWlpZfsX/H.sSdlPxClO6aD.zx.5zS68",
+        "sshAuthorizedKeys": [
+          "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFcf4JfS0+rJwI+hI0XN9HRZq0rWi/ACfetLfwpKLOpn tim@phoenix",
+          "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGDDfYmFvcwedB6m4wraEGbMFx/sphbV49Xt83K1E6mX jib@banana"
+        ]
+      }
+    ]
+  },
+  "storage": {
+    "disks": [
+      {
+        "device": "/dev/disk/by-diskseq/1",
+        "partitions": [
+          {
+            "label": "EFI-SYSTEM",
+            "number": 1,
+            "sizeMiB": 1024,
+            "typeGuid": "c12a7328-f81f-11d2-ba4b-00a0c93ec93b"
+          },
+          {
+            "label": "boot",
+            "number": 2,
+            "sizeMiB": 512
+          },
+          {
+            "label": "root",
+            "number": 3
+          }
+        ],
+        "wipeTable": true
+      }
+    ],
+    "filesystems": [
+      {
+        "device": "/dev/disk/by-partlabel/EFI-SYSTEM",
+        "format": "vfat",
+        "label": "EFI-SYSTEM",
+        "wipeFilesystem": true
+      },
+      {
+        "device": "/dev/disk/by-partlabel/boot",
+        "format": "ext4",
+        "label": "boot",
+        "wipeFilesystem": true
+      },
+      {
+        "device": "/dev/disk/by-partlabel/root",
+        "format": "ext4",
+        "label": "root",
+        "wipeFilesystem": true
+      }
+    ]
+  },
+  "systemd": {
+    "units": [
+      {
+        "enabled": false,
+        "mask": true,
+        "name": "zincati.service"
+      },
+      {
+        "dropins": [
+          {
+            "contents": "[Service]\n# Override Execstart in main unit\nExecStart=\n# Add new Execstart with `-` prefix to ignore failure`\nExecStart=-/usr/sbin/agetty --autologin core --noclear %I $TERM\n",
+            "name": "autologin-core.conf"
+          }
+        ],
+        "name": "serial-getty@ttyS0.service"
+      }
+    ]
+  }
+}

@@ -4,7 +4,7 @@ set -euxo pipefail
 #IMAGE="/var/lib/libvirt/images/fedora-coreos-40.20240701.3.0-qemu.x86_64"
 IMAGE="$HOME/Downloads/fedora-coreos-40.20240701.3.0-qemu.x86_64.qcow2"
 
-IGNITION_CONFIG="$HOME/cosa/ign-configs/ssh-and-autologin.ign"
+IGNITION_CONFIG=$(pwd)/"uki.ign"
 
 SB_VARS=$(pwd)/ovmf/VARS_CUSTOM.secboot.fd
 #SB_VARS=/var/lib/libvirt/images/VARS_CUSTOM.fd
