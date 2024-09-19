@@ -3,18 +3,18 @@ set -euo pipefail
 
 # Making sure the context is right
 #  - make sure we are root  
-#  - enable fsverity on the root filesystem
-#  - enabel fsverity on the ostree repository
+#  - Pre-pull container images to speed-up the demo
+#  - Clone the demo repo to get the scripts
 
 if [ "$EUID" -ne 0 ]
   then echo "Please run as root"
   exit
 fi
 
+# Download scripts
+git clone --depth=1 https://github.com/travier/fedora-coreos-uki setup 
+
 # Pull containers ahead of time
 skopeo copy docker://quay.io/travier/fedora-coreos-uki:latest oci-archive:coreos-signed
 podman pull quay.io/travier/fedora-coreos-uki:uki
-
-# Download scripts
-git clone --depth=1 https://github.com/travier/fedora-coreos-uki setup 
 

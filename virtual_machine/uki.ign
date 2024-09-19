@@ -38,6 +38,32 @@
         "wipeTable": true
       }
     ],
+    "files": [
+      {
+        "path": "/etc/containers/policy.json",
+        "contents": {
+          "compression": "gzip",
+          "source": "data:;base64,H4sIAAAAAAAC/8ySvU4DMQzH93uKk+em2bt1ZEMwog4hce/M0Tg4vkpR1XdHvVYt1R0gsXAZIusff/xi+1DVdV1DwK3r3xVW9csgnM7hag0uWhLCqgbBN/QK18fjYG0W50QqLubEohlWXzJAYN+h3GmD/tG7siS2Km5PKHaLgcUZz4KcTd/RHdI02ggxU5OVBZ+piRhgMe3dYXl02p4CLKq3qSPrOaqjiJLthcxcyMyIbJn61+9y56HyQ8CopGX07UnqnVPfPmHiTMpSYDLiWP2sbO6B4C/to5jR94Jr7zHpOhZtKTbwW+XbRtwY4NZQcxqJa3C8A//NeN5NExzuOM4Pjz3NEso48S3t5zLQ6nwfq+ozAAD//1i/lmvUBAAA"
+        },
+        "mode": 420
+      },
+      {
+        "path": "/etc/containers/registries.d/quay.io-travier-fedora-coreos-uki.yaml",
+        "contents": {
+          "compression": "",
+          "source": "data:,docker%3A%0A%20%20quay.io%2Ftravier%2Ffedora-coreos-uki%3A%0A%20%20%20%20use-sigstore-attachments%3A%20true%0A"
+        },
+        "mode": 420
+      },
+      {
+        "path": "/etc/pki/containers/quay.io-travier-fedora-coreos-uki.pub",
+        "contents": {
+          "compression": "",
+          "source": "data:,-----BEGIN%20PUBLIC%20KEY-----%0AMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEC3x2DnrNesBWpYAa9vXDaj82CpVn%0AL6GocR%2FQn2vVJViiwPoQp4nZy3N%2BuAe1WXCaGvvUzzod%2Bq2esdKlJaEogA%3D%3D%0A-----END%20PUBLIC%20KEY-----%0A"
+        },
+        "mode": 420
+      }
+    ],
     "filesystems": [
       {
         "device": "/dev/disk/by-partlabel/EFI-SYSTEM",

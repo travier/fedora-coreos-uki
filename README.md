@@ -3,82 +3,83 @@
 
 # How to reproduce
 
-## Get a secureboot VM
-See under [secureboot](./secureboot)
+## Start a secureboot VM
 
-This requires the root disk to be formatted in ext.4. 
-See [uki.bu](./uki.bu)
+See under [virtual_machine](./virtual_machine) to generate a volume containing
+the secureboot keys. This can then be attached to the virtual machine as NVRAM.
 
-Run `curl https://raw.githubusercontent.com/travier/fedora-coreos-uki/main/magic.sh | bash` as root.
+The integrity demo requires the root disk to be formatted in ext.4. \
+See [uki.bu](./uki.bu).
 
-## 1 setup systemdboot
+Once the coreOS VM is booted, follow these steps.\
+_NOTE:_ Everything should be ran as *root*.
 
-```
-curl https://dl.fedoraproject.org/pub/fedora/linux/updates/40/Everything/x86_64/Packages/s/systemd-boot-unsigned-255.10-3.fc40.x86_64.rpm \ 
-  --output systemd-boot-unsigned-255.10-3.fc40.x86_64.rpm
-rpm-ostree usroverlay
-rpm -i systemd-boot-unsigned-255.10-3.fc40.x86_64.rpm
+## 1 Download and unpack our signed build of coreOS
 
-sudo mount /dev/disk/by-partlabel/EFI-SYSTEM /boot/efi
-bootctl install
-# default sd-boot is 0 and default will boot firmware
-echo "timeout 30" >> /boot/efi/loader/loader.conf
-
-```
-## 2 Download signed composeFS fedora coreOS 
-
-Firstly, we enable fs-verity on the ostree repository
-```
-# turn on fsverity on filesystem
-sudo tune2fs -O verity /dev/vda4
-# enable fsverity in the ostree repo
+Enable FS verity on the root filesystem and the ostree repo:
+``` 
+tune2fs -O verity /dev/disk/by-partlabel/root
 ostree config set ex-fsverity.required true
-  
 ```
+Download and unencapsulate the conter, then deploy the ostree commit. \
+See [demo/1-ostree-commit](demo/1-ostree-commit).
 
-Then, we download and deploy the ostree build 
+## 2 Setup systemd-boot
+
+Install systemd-boot with `bootctl install`. A package is missing in FCOS 
+unfortunately. See [demo/2-install-sd-boot](demo/2-install-sd-boot).
+
+## 3 Setup the UKI
+
+You should be able to reboot into the new deployment and everything is sealed. 
+
+## 4 Put it to the test !! 
+
+In [demo/](demo) you will find two scripts named `4-demo-find-backing-file` and 
+`5-demo-tamper-file-block` to show how fsverity will protect your system against 
+tampering.
+
+
+Firstly, find the backing file of your target : 
 ```
-# create a new mount namespace
-unshare -m
-
-# remount /sysroot to writeable
-mount -o remount,rw /sysroot
-
-osversion="$(skopeo inspect docker://quay.io/travier/fedora-coreos-uki:latest | jq -r '.Labels."org.opencontainers.image.version"')"
-# extract ostree commit from image to a new reference : fedora/coreos/uki/$version.
-ostree container unencapsulate \
-  --repo /sysroot/ostree/repo \
-  --write-ref "fedora/coreos/uki/${osversion}" \
-  ostree-unverified-image:registry:quay.io/travier/fedora-coreos-uki:latest
-
-# deploy the ostree commit we just unencapsulated
-ostree admin deploy --stage "fedora/coreos/uki/${osversion}"
-
-ostree admin post-copy
+# 4-demo-find-backing-file /usr/lib/os-release
+The repo file for /usr/lib/os-release is:
+/ostree/repo/objects/75/591953b65dc61722f77f54e416fbeb7e342ad6bd53b80a07862475b662852d.file
 
 ```
+This script is just a helper to locate the backing file of a checked out file in the 
+ostree repo.
 
-## Install the UKI
+
+Then, tamper the backing file (make sure to be *root*):
 ```
-# container to extract the UKI
-podman create --name uki quay.io/travier/fedora-coreos-uki:uki
-podman cp uki:/uki uki
-podman cp uki:/systemd-bootx64-signed.efi systemd-bootx64-signed.efi
-podman rm -f uki
-podman rmi quay.io/travier/fedora-coreos-uki:uki
+# 5-demo-tamper-file-block /ostree/repo/objects/75/591953b65dc61722f77f54e416fbeb7e342ad6bd53b80a07862475b662852d.file
+/ostree/repo/objects/75/591953b65dc61722f77f54e416fbeb7e342ad6bd53b80a07862475b662852d.file is at offset on device /dev/disk/by-partlabel/root
+Original initial block:
+NAME="Fedora Linux"
+VERSION="40.
 
-# copy the uki to /boot
-mount -o remount,rw /boot
-machine_id=$(cat /etc/machine-id)
-kernelver=$(uname -r)
-mv uki /boot/efi/EFI/Linux/$machine_id-$kernelver.efi
+Modifying initial block
 
-# copy the signed systemd-boot
-mv systemd-bootx64-signed.efi /boot/efi/EFI/systemd/systemd-bootx64.efi
+Modified initial block:
+NAME="FOOBAR Linux"
+VERSION="40.
 ```
-Reboot !
+This script does a little bit more magic : it flushes the caches then locate the position
+of the file at the block level. This position is then overwrote with a few bytes to tamper the
+file content.
 
-See fsverity-success to check if all is working as expected.
+If you try to read the deployed file again you will get an error:
+```
+ cat /usr/lib/os-release 
+cat: /usr/lib/os-release: Input/output error
+
+```  
+And in the journal : 
+```
+[  156.086877] fs-verity (vda3, inode 426106): FILE CORRUPTED! pos=0, level=-1, want_hash=sha256:672df088670aaa61c35d14aa148168dc0e312ae9294f903ef85c8c0b5a17037a, real_hash=sha256:9bf652778a15df188e9318e6105f7a6e9154abb22a40dee4220fca8422b3d813
+
+```
 ## License
 
 See [LICENSE](LICENSE) or [CC0](https://creativecommons.org/public-domain/cc0/).

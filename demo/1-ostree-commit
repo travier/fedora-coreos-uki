@@ -7,7 +7,7 @@ tune2fs -O verity /dev/disk/by-partlabel/root
 ostree config set ex-fsverity.required true
 
 
-# we nned write access to /sysroot
+# we need write access to /sysroot
 mount -o remount,rw /sysroot
 
 # First, we populate the ostree repo with our signed commit

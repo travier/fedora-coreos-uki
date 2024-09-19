@@ -1,4 +1,10 @@
 #!/bin/bash
+
+if [ "$EUID" -ne 0 ]
+  then echo "You should be root"
+  exit 1
+fi
+
 echo 3 > /proc/sys/vm/drop_caches
 F=$1
 D=/dev/disk/by-partlabel/root

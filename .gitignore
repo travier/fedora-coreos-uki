@@ -1,3 +1,4 @@
 /fcos-uki/ostree-sign.pub
 /ostree-sign.key
 /ostree-sign.pub
+/virtual_machine/secureboot/ovmf/VARS_CUSTOM.secboot.fd
